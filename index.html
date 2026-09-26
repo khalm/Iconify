@@ -7,7 +7,7 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #f4f4f6; color: #222; margin: 0; }
-    .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 420px; margin: 10px auto; }
+    .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 440px; margin: 10px auto; }
     h2 { margin: 0 0 6px 0; font-size: 1.3rem; }
     p.desc { font-size: 0.88rem; color: #666; margin: 0 0 16px 0; line-height: 1.4; }
     
@@ -20,7 +20,7 @@
     .segmented-control button { flex: 1; border: none; background: transparent; padding: 8px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; cursor: pointer; color: #555; }
     .segmented-control button.active { background: white; color: #111; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-    /* Clean 3-color selector */
+    /* 3-color selector */
     .color-picker-group { display: flex; gap: 12px; margin-top: 6px; }
     .color-btn { 
       flex: 1; 
@@ -40,15 +40,21 @@
     .color-btn.active { border-color: #007aff; background: #f0f7ff; color: #007aff; }
     .dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); display: inline-block; }
 
-    /* Target checkboxes */
-    .targets-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-    .check-label { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; cursor: pointer; color: #333; }
-    .check-label input { width: 18px; height: 18px; accent-color: #007aff; }
+    /* Selection header & helpers */
+    .targets-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .quick-links { display: flex; gap: 8px; }
+    .quick-links a { font-size: 0.78rem; color: #007aff; text-decoration: none; cursor: pointer; font-weight: 600; }
+
+    /* Target checkboxes list */
+    .targets-container { border: 1px solid #ebebeb; border-radius: 10px; padding: 12px; background: #fafafa; display: flex; flex-direction: column; gap: 10px; }
+    .category-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: bold; margin-top: 4px; }
+    .category-title:first-child { margin-top: 0; }
+    .check-label { display: flex; align-items: center; gap: 9px; font-size: 0.85rem; cursor: pointer; color: #333; }
+    .check-label input { width: 17px; height: 17px; accent-color: #007aff; }
 
     /* Previews */
     .preview-box { display: flex; justify-content: space-around; margin: 20px 0; background: #fbfbfd; padding: 18px; border-radius: 12px; border: 1px solid #eee; }
-    .preview-item { text-align: center; font-size: 0.75rem; font-weight: 600; color: #555; transition: opacity 0.2s; }
-    .preview-item.disabled { opacity: 0.25; }
+    .preview-item { text-align: center; font-size: 0.75rem; font-weight: 600; color: #555; }
     
     .preview-canvas-wrapper { 
       width: 96px; 
@@ -75,7 +81,7 @@
 
 <div class="card">
   <h2>App Icon Generator</h2>
-  <p class="desc">Create guideline-compliant store icons directly on your device.</p>
+  <p class="desc">Create guideline-compliant store & app icons directly on your device.</p>
   
   <div class="form-group">
     <label class="section-label" for="upload">1. Select Source Image</label>
@@ -106,31 +112,66 @@
   </div>
 
   <div class="form-group">
-    <label class="section-label">4. Select Icons to Generate</label>
-    <div class="targets-list">
+    <div class="targets-header">
+      <label class="section-label" style="margin-bottom:0;">4. Export Sizes</label>
+      <div class="quick-links">
+        <a id="btn-stores-only">Stores Only</a>
+        <span>•</span>
+        <a id="btn-select-all">All</a>
+      </div>
+    </div>
+
+    <div class="targets-container">
+      <div class="category-title">Android</div>
       <label class="check-label">
-        <input type="checkbox" id="chk-ios" checked>
-        <span><strong>iOS App Store</strong> (1024×1024, Full-bleed square)</span>
+        <input type="checkbox" class="icon-chk" data-name="android-playstore-512.png" data-size="512" data-mode="normal" checked>
+        <span><strong>Play Store:</strong> 512×512 px</span>
       </label>
       <label class="check-label">
-        <input type="checkbox" id="chk-android" checked>
-        <span><strong>Google Play Store</strong> (512×512, Full-bleed square)</span>
+        <input type="checkbox" class="icon-chk" data-name="android-pwa-192.png" data-size="192" data-mode="normal" checked>
+        <span><strong>PWA / xxxhdpi:</strong> 192×192 px</span>
       </label>
       <label class="check-label">
-        <input type="checkbox" id="chk-android-adaptive">
-        <span><strong>Android Adaptive Foreground</strong> (432×432, Transparent)</span>
+        <input type="checkbox" class="icon-chk" data-name="android-xxhdpi-144.png" data-size="144" data-mode="normal">
+        <span><strong>xxhdpi:</strong> 144×144 px</span>
+      </label>
+      <label class="check-label">
+        <input type="checkbox" class="icon-chk" data-name="android-xhdpi-96.png" data-size="96" data-mode="normal">
+        <span><strong>xhdpi:</strong> 96×96 px</span>
+      </label>
+      <label class="check-label">
+        <input type="checkbox" class="icon-chk" data-name="android-mdpi-48.png" data-size="48" data-mode="normal">
+        <span><strong>mdpi:</strong> 48×48 px</span>
+      </label>
+      <label class="check-label">
+        <input type="checkbox" class="icon-chk" data-name="android-adaptive-foreground-432.png" data-size="432" data-mode="adaptive">
+        <span><strong>Adaptive Foreground:</strong> 432×432 px (Transparent)</span>
+      </label>
+
+      <div class="category-title">iOS (Apple)</div>
+      <label class="check-label">
+        <input type="checkbox" class="icon-chk" data-name="ios-appstore-1024.png" data-size="1024" data-mode="normal" checked>
+        <span><strong>App Store:</strong> 1024×1024 px</span>
+      </label>
+      <label class="check-label">
+        <input type="checkbox" class="icon-chk" data-name="ios-iphone-180.png" data-size="180" data-mode="normal">
+        <span><strong>iPhone @3x:</strong> 180×180 px</span>
+      </label>
+      <label class="check-label">
+        <input type="checkbox" class="icon-chk" data-name="ios-ipad-120.png" data-size="120" data-mode="normal">
+        <span><strong>iPhone @2x / iPad:</strong> 120×120 px</span>
       </label>
     </div>
   </div>
 
   <div class="preview-box">
-    <div class="preview-item" id="item-ios">
+    <div class="preview-item">
       <div class="preview-canvas-wrapper ios-mask">
         <canvas id="prev-ios" class="preview-img" width="192" height="192"></canvas>
       </div>
       <span>iOS Squircle</span>
     </div>
-    <div class="preview-item" id="item-android">
+    <div class="preview-item">
       <div class="preview-canvas-wrapper android-mask">
         <canvas id="prev-android" class="preview-img" width="192" height="192"></canvas>
       </div>
@@ -147,18 +188,15 @@
   const colorBtns = document.querySelectorAll('.color-btn');
   const dlBtn = document.getElementById('dl-btn');
   const statusMsg = document.getElementById('status-msg');
+  const checkboxes = document.querySelectorAll('.icon-chk');
+
+  const btnStoresOnly = document.getElementById('btn-stores-only');
+  const btnSelectAll = document.getElementById('btn-select-all');
 
   const btnCover = document.getElementById('mode-cover');
   const btnFit = document.getElementById('mode-fit');
   let scaleMode = 'cover'; 
   let selectedBgColor = '#ffffff';
-
-  const chkIos = document.getElementById('chk-ios');
-  const chkAndroid = document.getElementById('chk-android');
-  const chkAndroidAdaptive = document.getElementById('chk-android-adaptive');
-
-  const itemIos = document.getElementById('item-ios');
-  const itemAndroid = document.getElementById('item-android');
 
   let sourceImg = null;
 
@@ -177,7 +215,7 @@
     if (sourceImg) updatePreviews();
   });
 
-  // Switch between White, Black, and Blue
+  // Background color selection
   colorBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       colorBtns.forEach(b => b.classList.remove('active'));
@@ -185,6 +223,21 @@
       selectedBgColor = btn.dataset.color;
       if (sourceImg) updatePreviews();
     });
+  });
+
+  // Quick selections
+  btnStoresOnly.addEventListener('click', () => {
+    checkboxes.forEach(chk => {
+      const size = parseInt(chk.dataset.size);
+      chk.checked = (size === 1024 || size === 512 || size === 192);
+    });
+    validateButtonState();
+  });
+
+  btnSelectAll.addEventListener('click', () => {
+    const allChecked = Array.from(checkboxes).every(chk => chk.checked);
+    checkboxes.forEach(chk => chk.checked = !allChecked);
+    validateButtonState();
   });
 
   upload.addEventListener('change', (e) => {
@@ -204,16 +257,11 @@
   });
 
   function validateButtonState() {
-    const anyChecked = chkIos.checked || chkAndroid.checked || chkAndroidAdaptive.checked;
+    const anyChecked = Array.from(checkboxes).some(chk => chk.checked);
     dlBtn.disabled = !sourceImg || !anyChecked;
-
-    itemIos.classList.toggle('disabled', !chkIos.checked);
-    itemAndroid.classList.toggle('disabled', !chkAndroid.checked && !chkAndroidAdaptive.checked);
   }
 
-  [chkIos, chkAndroid, chkAndroidAdaptive].forEach(chk => {
-    chk.addEventListener('change', validateButtonState);
-  });
+  checkboxes.forEach(chk => chk.addEventListener('change', validateButtonState));
 
   function drawToCanvas(size, mode, forceBgColor) {
     const canvas = document.createElement('canvas');
@@ -268,22 +316,22 @@
   async function getGeneratedFiles() {
     const files = [];
 
-    if (chkIos.checked) {
-      const c = drawToCanvas(1024, scaleMode, selectedBgColor);
-      const blob = await getCanvasBlob(c);
-      files.push({ name: 'ios-icon-1024.png', blob: blob });
-    }
+    for (const chk of checkboxes) {
+      if (!chk.checked) continue;
 
-    if (chkAndroid.checked) {
-      const c = drawToCanvas(512, scaleMode, selectedBgColor);
-      const blob = await getCanvasBlob(c);
-      files.push({ name: 'android-playstore-512.png', blob: blob });
-    }
+      const size = parseInt(chk.dataset.size);
+      const mode = chk.dataset.mode;
+      const filename = chk.dataset.name;
 
-    if (chkAndroidAdaptive.checked) {
-      const c = drawToCanvas(432, 'fit', null);
-      const blob = await getCanvasBlob(c);
-      files.push({ name: 'android-adaptive-foreground-432.png', blob: blob });
+      let canvas;
+      if (mode === 'adaptive') {
+        canvas = drawToCanvas(size, 'fit', null); // Transparent background for adaptive foreground
+      } else {
+        canvas = drawToCanvas(size, scaleMode, selectedBgColor);
+      }
+
+      const blob = await getCanvasBlob(canvas);
+      files.push({ name: filename, blob: blob });
     }
 
     return files;
@@ -322,7 +370,7 @@
           await writable.close();
         }
 
-        statusMsg.textContent = 'Saved successfully to selected folder!';
+        statusMsg.textContent = `Saved ${files.length} icon(s) successfully!`;
         setTimeout(() => { statusMsg.textContent = ''; }, 4000);
         validateButtonState();
         return;
@@ -356,7 +404,7 @@
       }
     }
 
-    statusMsg.textContent = 'Downloading files...';
+    statusMsg.textContent = `Downloading ${files.length} files...`;
     files.forEach((f, idx) => {
       setTimeout(() => {
         triggerDownloadFallback(f.blob, f.name);
