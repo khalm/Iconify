@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Icon Generator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #f4f4f6; color: #222; margin: 0; }
+    .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 420px; margin: 10px auto; }
+    h2 { margin: 0 0 8px 0; font-size: 1.3rem; }
+    p.desc { font-size: 0.9rem; color: #666; margin: 0 0 18px 0; line-height: 1.4; }
+    
+    .form-group { margin-bottom: 16px; }
+    label.section-label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px; color: #444; }
+    input[type="file"] { width: 100%; font-size: 0.9rem; }
+
+    /* Color picker & presets */
+    .color-section { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+    input[type="color"] { border: none; width: 44px; height: 44px; border-radius: 8px; cursor: pointer; padding: 0; background: none; }
+    .presets { display: flex; gap: 6px; flex-wrap: wrap; }
+    .preset-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; cursor: pointer; padding: 0; outline: none; }
+
+    /* Checkbox list */
+    .targets-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .check-label { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; cursor: pointer; color: #333; }
+    .check-label input { width: 18px; height: 18px; accent-color: #007aff; }
+
+    /* Previews */
+    .preview-box { display: flex; justify-content: space-around; margin: 20px 0; background: #fbfbfd; padding: 14px; border-radius: 12px; border: 1px solid #eee; }
+    .preview-item { text-align: center; font-size: 0.75rem; font-weight: 600; color: #555; transition: opacity 0.2s; }
+    .preview-item.disabled { opacity: 0.25; }
+    .preview-canvas-wrapper { width: 84px; height: 84px; margin: 0 auto 8px; position: relative; }
+    canvas.preview-img { width: 100%; height: 100%; display: block; }
+    .ios-mask { border-radius: 19px; box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+    .android-mask { border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+
+    /* Buttons & status */
+    button.action-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; background: #007aff; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: opacity 0.15s; margin-top: 6px; }
+    button.action-btn:active { opacity: 0.8; }
+    button.action-btn:disabled { background: #d0d0d5 !important; cursor: not-allowed; opacity: 1; }
+    .status-msg { font-size: 0.82rem; color: #007aff; text-align: center; margin-top: 10px; min-height: 18px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>App Icon Generator</h2>
+  <p class="desc">Export store-compliant icons directly to your chosen device folder.</p>
+  
+  <div class="form-group">
+    <label class="section-label" for="upload">1. Select Source Image</label>
+    <input type="file" id="upload" accept="image/*">
+  </div>
+
+  <div class="form-group">
+    <label class="section-label" for="bg-color">2. Background Fill Color</label>
+    <div class="color-section">
+      <input type="color" id="bg-color" value="#ffffff">
+      <div class="presets">
+        <button class="preset-btn" style="background: #ffffff;" data-color="#ffffff" title="White"></button>
+        <button class="preset-btn" style="background: #000000;" data-color="#000000" title="Black"></button>
+        <button class="preset-btn" style="background: #007aff;" data-color="#007aff" title="iOS Blue"></button>
+        <button class="preset-btn" style="background: #111827;" data-color="#111827" title="Dark Slate"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="section-label">3. Select Icons to Generate</label>
+    <div class="targets-list">
+      <label class="check-label">
+        <input type="checkbox" id="chk-ios" checked>
+        <span><strong>iOS App Store</strong> (1024×1024, Solid BG)</span>
+      </label>
+      <label class="check-label">
+        <input type="checkbox" id="chk-android" checked>
+        <span><strong>Google Play Store</strong> (512×512, Padded)</span>
+      </label>
+      <label class="check-label">
+        <input type="checkbox" id="chk-android-adaptive">
+        <span><strong>Android Adaptive Foreground</strong> (432×432, Transparent)</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="preview-box">
+    <div class="preview-item" id="item-ios">
+      <div class="preview-canvas-wrapper">
+        <canvas id="prev-ios" class="preview-img ios-mask" width="168" height="168"></canvas>
+      </div>
+      <span>iOS Squircle</span>
+    </div>
+    <div class="preview-item" id="item-android">
+      <div class="preview-canvas-wrapper">
+        <canvas id="prev-android" class="preview-img android-mask" width="168" height="168"></canvas>
+      </div>
+      <span>Android Circle</span>
+    </div>
+  </div>
+
+  <button id="dl-btn" class="action-btn" disabled>Choose Destination & Save</button>
+  <div class="status-msg" id="status-msg"></div>
+</div>
+
+<script>
+  const upload = document.getElementById('upload');
+  const bgColorInput = document.getElementById('bg-color');
+  const presetBtns = document.querySelectorAll('.preset-btn');
+  const dlBtn = document.getElementById('dl-btn');
+  const statusMsg = document.getElementById('status-msg');
+
+  const chkIos = document.getElementById('chk-ios');
+  const chkAndroid = document.getElementById('chk-android');
+  const chkAndroidAdaptive = document.getElementById('chk-android-adaptive');
+
+  const itemIos = document.getElementById('item-ios');
+  const itemAndroid = document.getElementById('item-android');
+
+  let sourceImg = null;
+
+  upload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      sourceImg = new Image();
+      sourceImg.onload = () => {
+        updatePreviews();
+        validateButtonState();
+      };
+      sourceImg.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function validateButtonState() {
+    const anyChecked = chkIos.checked || chkAndroid.checked || chkAndroidAdaptive.checked;
+    dlBtn.disabled = !sourceImg || !anyChecked;
+
+    itemIos.classList.toggle('disabled', !chkIos.checked);
+    itemAndroid.classList.toggle('disabled', !chkAndroid.checked && !chkAndroidAdaptive.checked);
+  }
+
+  [chkIos, chkAndroid, chkAndroidAdaptive].forEach(chk => {
+    chk.addEventListener('change', validateButtonState);
+  });
+
+  bgColorInput.addEventListener('input', () => {
+    if (sourceImg) updatePreviews();
+  });
+
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      bgColorInput.value = btn.dataset.color;
+      if (sourceImg) updatePreviews();
+    });
+  });
+
+  function drawToCanvas(size, padRatio, forceBgColor) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    if (forceBgColor) {
+      ctx.fillStyle = forceBgColor;
+      ctx.fillRect(0, 0, size, size);
+    }
+
+    if (!sourceImg) return canvas;
+
+    const drawSize = size * padRatio;
+    const offset = (size - drawSize) / 2;
+
+    const scale = Math.min(drawSize / sourceImg.width, drawSize / sourceImg.height);
+    const w = sourceImg.width * scale;
+    const h = sourceImg.height * scale;
+    const x = offset + (drawSize - w) / 2;
+    const y = offset + (drawSize - h) / 2;
+
+    ctx.drawImage(sourceImg, x, y, w, h);
+    return canvas;
+  }
+
+  function getCanvasBlob(canvas) {
+    return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  }
+
+  function updatePreviews() {
+    const color = bgColorInput.value;
+    const iosCanv = drawToCanvas(168, 1.0, color);
+    const androidCanv = drawToCanvas(168, 0.72, color);
+
+    const prevIosCtx = document.getElementById('prev-ios').getContext('2d');
+    prevIosCtx.clearRect(0, 0, 168, 168);
+    prevIosCtx.drawImage(iosCanv, 0, 0);
+
+    const prevAndroidCtx = document.getElementById('prev-android').getContext('2d');
+    prevAndroidCtx.clearRect(0, 0, 168, 168);
+    prevAndroidCtx.drawImage(androidCanv, 0, 0);
+  }
+
+  async function getGeneratedFiles() {
+    const color = bgColorInput.value;
+    const files = [];
+
+    if (chkIos.checked) {
+      const c = drawToCanvas(1024, 1.0, color);
+      const blob = await getCanvasBlob(c);
+      files.push({ name: 'ios-icon-1024.png', blob: blob });
+    }
+
+    if (chkAndroid.checked) {
+      const c = drawToCanvas(512, 0.72, color);
+      const blob = await getCanvasBlob(c);
+      files.push({ name: 'android-playstore-512.png', blob: blob });
+    }
+
+    if (chkAndroidAdaptive.checked) {
+      const c = drawToCanvas(432, 0.66, null);
+      const blob = await getCanvasBlob(c);
+      files.push({ name: 'android-adaptive-foreground-432.png', blob: blob });
+    }
+
+    return files;
+  }
+
+  function triggerDownloadFallback(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  dlBtn.addEventListener('click', async () => {
+    dlBtn.disabled = true;
+    statusMsg.textContent = 'Generating icons...';
+
+    const files = await getGeneratedFiles();
+    if (files.length === 0) {
+      validateButtonState();
+      return;
+    }
+
+    // Approach 1: Modern File System Access API (Supported on Chrome/Android)
+    if ('showDirectoryPicker' in window) {
+      try {
+        statusMsg.textContent = 'Pick a destination folder...';
+        const dirHandle = await window.showDirectoryPicker();
+        
+        for (const item of files) {
+          const fileHandle = await dirHandle.getFileHandle(item.name, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(item.blob);
+          await writable.close();
+        }
+
+        statusMsg.textContent = 'Saved successfully to selected folder!';
+        setTimeout(() => { statusMsg.textContent = ''; }, 4000);
+        validateButtonState();
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          statusMsg.textContent = 'Folder selection cancelled.';
+          validateButtonState();
+          return;
+        }
+        console.warn('Directory Picker failed, falling back...', err);
+      }
+    }
+
+    // Approach 2: Web Share API (Safari iOS - brings up "Save to Files" to choose folder)
+    const fileObjects = files.map(f => new File([f.blob], f.name, { type: 'image/png' }));
+    if (navigator.canShare && navigator.canShare({ files: fileObjects })) {
+      try {
+        statusMsg.textContent = 'Select "Save to Files" in the menu...';
+        await navigator.share({
+          files: fileObjects,
+          title: 'App Icons',
+        });
+        statusMsg.textContent = 'Files shared successfully!';
+        setTimeout(() => { statusMsg.textContent = ''; }, 4000);
+        validateButtonState();
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          statusMsg.textContent = 'Saving cancelled.';
+          validateButtonState();
+          return;
+        }
+        console.warn('Web Share failed, falling back...', err);
+      }
+    }
+
+    // Approach 3: Standard browser downloads fallback
+    statusMsg.textContent = 'Downloading files...';
+    files.forEach((f, idx) => {
+      setTimeout(() => {
+        triggerDownloadFallback(f.blob, f.name);
+      }, idx * 250);
+    });
+
+    statusMsg.textContent = 'Files downloaded to default Downloads folder.';
+    setTimeout(() => { statusMsg.textContent = ''; }, 4000);
+    validateButtonState();
+  });
+</script>
+</body>
+</html>
