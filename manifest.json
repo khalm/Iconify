@@ -1,10 +1,11 @@
 {
   "name": "Iconify",
-  "short_name": "Iconify",
+  "short_name": "ICONIFY",
   "description": "Generate guideline-compliant app icons right on your phone.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f4f4f6",
+  "background_color": "#007aff",
   "theme_color": "#007aff",
   "icons": [
     {
