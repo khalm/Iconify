@@ -8,34 +8,63 @@
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #f4f4f6; color: #222; margin: 0; }
     .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 420px; margin: 10px auto; }
-    h2 { margin: 0 0 8px 0; font-size: 1.3rem; }
-    p.desc { font-size: 0.9rem; color: #666; margin: 0 0 18px 0; line-height: 1.4; }
+    h2 { margin: 0 0 6px 0; font-size: 1.3rem; }
+    p.desc { font-size: 0.88rem; color: #666; margin: 0 0 16px 0; line-height: 1.4; }
     
     .form-group { margin-bottom: 16px; }
     label.section-label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px; color: #444; }
     input[type="file"] { width: 100%; font-size: 0.9rem; }
 
-    /* Color picker & presets */
-    .color-section { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-    input[type="color"] { border: none; width: 44px; height: 44px; border-radius: 8px; cursor: pointer; padding: 0; background: none; }
-    .presets { display: flex; gap: 6px; flex-wrap: wrap; }
-    .preset-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; cursor: pointer; padding: 0; outline: none; }
+    /* Segmented controls & options */
+    .segmented-control { display: flex; background: #eeeff3; padding: 3px; border-radius: 8px; gap: 4px; }
+    .segmented-control button { flex: 1; border: none; background: transparent; padding: 8px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; cursor: pointer; color: #555; }
+    .segmented-control button.active { background: white; color: #111; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-    /* Checkbox list */
+    /* Clean 3-color selector */
+    .color-picker-group { display: flex; gap: 12px; margin-top: 6px; }
+    .color-btn { 
+      flex: 1; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+      padding: 10px; 
+      border-radius: 8px; 
+      border: 2px solid #e5e5ea; 
+      background: #fafafa; 
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      font-weight: 600; 
+      color: #333; 
+    }
+    .color-btn.active { border-color: #007aff; background: #f0f7ff; color: #007aff; }
+    .dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); display: inline-block; }
+
+    /* Target checkboxes */
     .targets-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
     .check-label { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; cursor: pointer; color: #333; }
     .check-label input { width: 18px; height: 18px; accent-color: #007aff; }
 
     /* Previews */
-    .preview-box { display: flex; justify-content: space-around; margin: 20px 0; background: #fbfbfd; padding: 14px; border-radius: 12px; border: 1px solid #eee; }
+    .preview-box { display: flex; justify-content: space-around; margin: 20px 0; background: #fbfbfd; padding: 18px; border-radius: 12px; border: 1px solid #eee; }
     .preview-item { text-align: center; font-size: 0.75rem; font-weight: 600; color: #555; transition: opacity 0.2s; }
     .preview-item.disabled { opacity: 0.25; }
-    .preview-canvas-wrapper { width: 84px; height: 84px; margin: 0 auto 8px; position: relative; }
+    
+    .preview-canvas-wrapper { 
+      width: 96px; 
+      height: 96px; 
+      margin: 0 auto 8px; 
+      position: relative; 
+      overflow: hidden; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      background: #e5e5ea;
+    }
+    
+    .ios-mask { border-radius: 22.37%; }
+    .android-mask { border-radius: 50%; }
     canvas.preview-img { width: 100%; height: 100%; display: block; }
-    .ios-mask { border-radius: 19px; box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
-    .android-mask { border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
 
-    /* Buttons & status */
+    /* Action button */
     button.action-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; background: #007aff; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: opacity 0.15s; margin-top: 6px; }
     button.action-btn:active { opacity: 0.8; }
     button.action-btn:disabled { background: #d0d0d5 !important; cursor: not-allowed; opacity: 1; }
@@ -46,7 +75,7 @@
 
 <div class="card">
   <h2>App Icon Generator</h2>
-  <p class="desc">Export store-compliant icons directly to your chosen device folder.</p>
+  <p class="desc">Create guideline-compliant store icons directly on your device.</p>
   
   <div class="form-group">
     <label class="section-label" for="upload">1. Select Source Image</label>
@@ -54,28 +83,38 @@
   </div>
 
   <div class="form-group">
-    <label class="section-label" for="bg-color">2. Background Fill Color</label>
-    <div class="color-section">
-      <input type="color" id="bg-color" value="#ffffff">
-      <div class="presets">
-        <button class="preset-btn" style="background: #ffffff;" data-color="#ffffff" title="White"></button>
-        <button class="preset-btn" style="background: #000000;" data-color="#000000" title="Black"></button>
-        <button class="preset-btn" style="background: #007aff;" data-color="#007aff" title="iOS Blue"></button>
-        <button class="preset-btn" style="background: #111827;" data-color="#111827" title="Dark Slate"></button>
-      </div>
+    <label class="section-label">2. Scaling Mode</label>
+    <div class="segmented-control">
+      <button type="button" id="mode-cover" class="active">Cover / Bleed (Artwork)</button>
+      <button type="button" id="mode-fit">Fit Logo (Safe Zone)</button>
     </div>
   </div>
 
   <div class="form-group">
-    <label class="section-label">3. Select Icons to Generate</label>
+    <label class="section-label">3. Background Fill Color</label>
+    <div class="color-picker-group">
+      <button type="button" class="color-btn active" data-color="#ffffff">
+        <span class="dot" style="background: #ffffff;"></span> White
+      </button>
+      <button type="button" class="color-btn" data-color="#000000">
+        <span class="dot" style="background: #000000;"></span> Black
+      </button>
+      <button type="button" class="color-btn" data-color="#007aff">
+        <span class="dot" style="background: #007aff;"></span> Blue
+      </button>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="section-label">4. Select Icons to Generate</label>
     <div class="targets-list">
       <label class="check-label">
         <input type="checkbox" id="chk-ios" checked>
-        <span><strong>iOS App Store</strong> (1024×1024, Solid BG)</span>
+        <span><strong>iOS App Store</strong> (1024×1024, Full-bleed square)</span>
       </label>
       <label class="check-label">
         <input type="checkbox" id="chk-android" checked>
-        <span><strong>Google Play Store</strong> (512×512, Padded)</span>
+        <span><strong>Google Play Store</strong> (512×512, Full-bleed square)</span>
       </label>
       <label class="check-label">
         <input type="checkbox" id="chk-android-adaptive">
@@ -86,14 +125,14 @@
 
   <div class="preview-box">
     <div class="preview-item" id="item-ios">
-      <div class="preview-canvas-wrapper">
-        <canvas id="prev-ios" class="preview-img ios-mask" width="168" height="168"></canvas>
+      <div class="preview-canvas-wrapper ios-mask">
+        <canvas id="prev-ios" class="preview-img" width="192" height="192"></canvas>
       </div>
       <span>iOS Squircle</span>
     </div>
     <div class="preview-item" id="item-android">
-      <div class="preview-canvas-wrapper">
-        <canvas id="prev-android" class="preview-img android-mask" width="168" height="168"></canvas>
+      <div class="preview-canvas-wrapper android-mask">
+        <canvas id="prev-android" class="preview-img" width="192" height="192"></canvas>
       </div>
       <span>Android Circle</span>
     </div>
@@ -105,10 +144,14 @@
 
 <script>
   const upload = document.getElementById('upload');
-  const bgColorInput = document.getElementById('bg-color');
-  const presetBtns = document.querySelectorAll('.preset-btn');
+  const colorBtns = document.querySelectorAll('.color-btn');
   const dlBtn = document.getElementById('dl-btn');
   const statusMsg = document.getElementById('status-msg');
+
+  const btnCover = document.getElementById('mode-cover');
+  const btnFit = document.getElementById('mode-fit');
+  let scaleMode = 'cover'; 
+  let selectedBgColor = '#ffffff';
 
   const chkIos = document.getElementById('chk-ios');
   const chkAndroid = document.getElementById('chk-android');
@@ -118,6 +161,31 @@
   const itemAndroid = document.getElementById('item-android');
 
   let sourceImg = null;
+
+  // Toggle Cover vs Fit
+  btnCover.addEventListener('click', () => {
+    scaleMode = 'cover';
+    btnCover.classList.add('active');
+    btnFit.classList.remove('active');
+    if (sourceImg) updatePreviews();
+  });
+
+  btnFit.addEventListener('click', () => {
+    scaleMode = 'fit';
+    btnFit.classList.add('active');
+    btnCover.classList.remove('active');
+    if (sourceImg) updatePreviews();
+  });
+
+  // Switch between White, Black, and Blue
+  colorBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      colorBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedBgColor = btn.dataset.color;
+      if (sourceImg) updatePreviews();
+    });
+  });
 
   upload.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -147,18 +215,7 @@
     chk.addEventListener('change', validateButtonState);
   });
 
-  bgColorInput.addEventListener('input', () => {
-    if (sourceImg) updatePreviews();
-  });
-
-  presetBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      bgColorInput.value = btn.dataset.color;
-      if (sourceImg) updatePreviews();
-    });
-  });
-
-  function drawToCanvas(size, padRatio, forceBgColor) {
+  function drawToCanvas(size, mode, forceBgColor) {
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
@@ -171,55 +228,60 @@
 
     if (!sourceImg) return canvas;
 
-    const drawSize = size * padRatio;
-    const offset = (size - drawSize) / 2;
+    let scale;
+    if (mode === 'cover') {
+      scale = Math.max(size / sourceImg.width, size / sourceImg.height);
+      const w = sourceImg.width * scale;
+      const h = sourceImg.height * scale;
+      const x = (size - w) / 2;
+      const y = (size - h) / 2;
+      ctx.drawImage(sourceImg, x, y, w, h);
+    } else {
+      const safeSize = size * 0.70;
+      scale = Math.min(safeSize / sourceImg.width, safeSize / sourceImg.height);
+      const w = sourceImg.width * scale;
+      const h = sourceImg.height * scale;
+      const x = (size - w) / 2;
+      const y = (size - h) / 2;
+      ctx.drawImage(sourceImg, x, y, w, h);
+    }
 
-    const scale = Math.min(drawSize / sourceImg.width, drawSize / sourceImg.height);
-    const w = sourceImg.width * scale;
-    const h = sourceImg.height * scale;
-    const x = offset + (drawSize - w) / 2;
-    const y = offset + (drawSize - h) / 2;
-
-    ctx.drawImage(sourceImg, x, y, w, h);
     return canvas;
+  }
+
+  function updatePreviews() {
+    const previewCanvas = drawToCanvas(192, scaleMode, selectedBgColor);
+
+    const prevIosCtx = document.getElementById('prev-ios').getContext('2d');
+    prevIosCtx.clearRect(0, 0, 192, 192);
+    prevIosCtx.drawImage(previewCanvas, 0, 0);
+
+    const prevAndroidCtx = document.getElementById('prev-android').getContext('2d');
+    prevAndroidCtx.clearRect(0, 0, 192, 192);
+    prevAndroidCtx.drawImage(previewCanvas, 0, 0);
   }
 
   function getCanvasBlob(canvas) {
     return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
   }
 
-  function updatePreviews() {
-    const color = bgColorInput.value;
-    const iosCanv = drawToCanvas(168, 1.0, color);
-    const androidCanv = drawToCanvas(168, 0.72, color);
-
-    const prevIosCtx = document.getElementById('prev-ios').getContext('2d');
-    prevIosCtx.clearRect(0, 0, 168, 168);
-    prevIosCtx.drawImage(iosCanv, 0, 0);
-
-    const prevAndroidCtx = document.getElementById('prev-android').getContext('2d');
-    prevAndroidCtx.clearRect(0, 0, 168, 168);
-    prevAndroidCtx.drawImage(androidCanv, 0, 0);
-  }
-
   async function getGeneratedFiles() {
-    const color = bgColorInput.value;
     const files = [];
 
     if (chkIos.checked) {
-      const c = drawToCanvas(1024, 1.0, color);
+      const c = drawToCanvas(1024, scaleMode, selectedBgColor);
       const blob = await getCanvasBlob(c);
       files.push({ name: 'ios-icon-1024.png', blob: blob });
     }
 
     if (chkAndroid.checked) {
-      const c = drawToCanvas(512, 0.72, color);
+      const c = drawToCanvas(512, scaleMode, selectedBgColor);
       const blob = await getCanvasBlob(c);
       files.push({ name: 'android-playstore-512.png', blob: blob });
     }
 
     if (chkAndroidAdaptive.checked) {
-      const c = drawToCanvas(432, 0.66, null);
+      const c = drawToCanvas(432, 'fit', null);
       const blob = await getCanvasBlob(c);
       files.push({ name: 'android-adaptive-foreground-432.png', blob: blob });
     }
@@ -248,7 +310,6 @@
       return;
     }
 
-    // Approach 1: Modern File System Access API (Supported on Chrome/Android)
     if ('showDirectoryPicker' in window) {
       try {
         statusMsg.textContent = 'Pick a destination folder...';
@@ -271,11 +332,9 @@
           validateButtonState();
           return;
         }
-        console.warn('Directory Picker failed, falling back...', err);
       }
     }
 
-    // Approach 2: Web Share API (Safari iOS - brings up "Save to Files" to choose folder)
     const fileObjects = files.map(f => new File([f.blob], f.name, { type: 'image/png' }));
     if (navigator.canShare && navigator.canShare({ files: fileObjects })) {
       try {
@@ -284,7 +343,7 @@
           files: fileObjects,
           title: 'App Icons',
         });
-        statusMsg.textContent = 'Files shared successfully!';
+        statusMsg.textContent = 'Files saved successfully!';
         setTimeout(() => { statusMsg.textContent = ''; }, 4000);
         validateButtonState();
         return;
@@ -294,11 +353,9 @@
           validateButtonState();
           return;
         }
-        console.warn('Web Share failed, falling back...', err);
       }
     }
 
-    // Approach 3: Standard browser downloads fallback
     statusMsg.textContent = 'Downloading files...';
     files.forEach((f, idx) => {
       setTimeout(() => {
